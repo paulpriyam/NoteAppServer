@@ -1,11 +1,12 @@
 package com.example.repository
 
+import com.example.data.model.Notes
 import com.example.data.model.User
+import com.example.data.table.NotesTable
 import com.example.data.table.UserTable
 import com.example.repository.DatabaseFactory.dbQuery
-import org.jetbrains.exposed.sql.ResultRow
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 
 class Repo {
 
@@ -34,6 +35,55 @@ class Repo {
             email = row[UserTable.email],
             hashPassword = row[UserTable.hashPassword],
             name = row[UserTable.name]
+        )
+    }
+
+   suspend  fun addNote(note:Notes,email:String){
+        dbQuery {
+         NotesTable.insert {nt->
+             nt[noteId]=note.id
+             nt[noteDescription]=note.description
+             nt[noteTitle]=note.title
+             nt[userEmail]=email
+             nt[date]=note.date
+         }
+        }
+    }
+
+    suspend fun updateNote(note: Notes,email: String){
+        dbQuery {
+            NotesTable.update(
+                where = {NotesTable.userEmail.eq(email) and NotesTable.noteId.eq(note.id)}
+            ) {nt->
+                nt[noteId]=note.id
+                nt[noteDescription]=note.description
+                nt[noteTitle]=note.title
+                nt[userEmail]=email
+                nt[date]=note.date
+            }
+        }
+    }
+
+    suspend fun deleteNote(noteId:String){
+        dbQuery {
+            NotesTable.deleteWhere { NotesTable.noteId.eq(noteId) }
+        }
+    }
+
+    suspend fun getAllNotes(email: String):List<Notes> = dbQuery {
+        NotesTable.select{
+            NotesTable.userEmail.eq(email)
+        }.mapNotNull {
+            rowToNote(it)
+        }
+    }
+
+    private fun rowToNote(row:ResultRow):Notes{
+        return Notes(
+            id = row[NotesTable.noteId],
+            title = row[NotesTable.noteTitle],
+            description = row[NotesTable.noteDescription],
+            date = row[NotesTable.date]
         )
     }
 }
