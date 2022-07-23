@@ -4,12 +4,13 @@ import com.example.authentication.JwtService
 import com.example.authentication.hash
 import com.example.data.model.User
 import io.ktor.application.*
-import com.example.plugins.*
 import com.example.repository.DatabaseFactory
 import com.example.repository.Repo
+import com.example.routes.UserRoute
 import io.ktor.auth.*
 import io.ktor.features.*
 import io.ktor.gson.*
+import io.ktor.locations.*
 import io.ktor.response.*
 import io.ktor.routing.*
 
@@ -24,6 +25,7 @@ fun Application.module() {
     val hashFunction ={s:String-> hash(s)}
     DatabaseFactory.init()
 
+    install(CallLogging)
     install(ContentNegotiation) {
         gson()
     }
@@ -32,20 +34,23 @@ fun Application.module() {
 
     }
 
+    install(Locations)
+
 
     routing {
-        get("/") {
-            call.respondText("Hello World!")
-        }
-        get("/login"){
-            val name =call.request.queryParameters["name"]
-            val email =call.request.queryParameters["email"]
-            val password = call.request.queryParameters["password"]
-            if(name!=null && password!=null && email!=null){
-                val user= User(email,hashFunction(password),name)
-                call.respond( jwtService.generateToken(user))
-            }
-
-        }
+        UserRoute(db, jwtService, hashFunction)
+//        get("/") {
+//            call.respondText("Hello World!")
+//        }
+//        get("/login"){
+//            val name =call.request.queryParameters["name"]
+//            val email =call.request.queryParameters["email"]
+//            val password = call.request.queryParameters["password"]
+//            if(name!=null && password!=null && email!=null){
+//                val user= User(email,hashFunction(password),name)
+//                call.respond( jwtService.generateToken(user))
+//            }
+//
+//        }
     }
 }
