@@ -14,6 +14,8 @@ import io.ktor.gson.*
 import io.ktor.locations.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
 
 fun main(args: Array<String>): Unit =
     io.ktor.server.netty.EngineMain.main(args)
@@ -53,15 +55,5 @@ fun Application.module() {
         get("/") {
             call.respondText("Hello World!")
         }
-//        get("/login"){
-//            val name =call.request.queryParameters["name"]
-//            val email =call.request.queryParameters["email"]
-//            val password = call.request.queryParameters["password"]
-//            if(name!=null && password!=null && email!=null){
-//                val user= User(email,hashFunction(password),name)
-//                call.respond( jwtService.generateToken(user))
-//            }
-//
-//        }
     }
 }
