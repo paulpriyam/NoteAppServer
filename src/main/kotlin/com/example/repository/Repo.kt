@@ -6,30 +6,29 @@ import com.example.data.table.NotesTable
 import com.example.data.table.UserTable
 import com.example.repository.DatabaseFactory.dbQuery
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 
 class Repo {
 
-    suspend fun addUser(user: User){
+    suspend fun addUser(user: User) {
         dbQuery {
-            UserTable.insert { ut->
-                ut[UserTable.name]=user.name
-                ut[UserTable.hashPassword]=user.hashPassword
-                ut[UserTable.email]=user.email
+            UserTable.insert { ut ->
+                ut[name] = user.name
+                ut[hashPassword] = user.hashPassword
+                ut[email] = user.email
             }
         }
     }
 
-    suspend fun findUserByEmail(email:String)= dbQuery {
-      UserTable.select { UserTable.email.eq(email) }
-          .map {
-              rowToUser(it)
-          }
-          .firstOrNull()
+    suspend fun findUserByEmail(email: String) = dbQuery {
+        UserTable.select { UserTable.email.eq(email) }
+            .map {
+                rowToUser(it)
+            }
+            .firstOrNull()
     }
 
-    private fun rowToUser(row:ResultRow?):User?{
-        if(row==null) return null
+    private fun rowToUser(row: ResultRow?): User? {
+        if (row == null) return null
 
         return User(
             email = row[UserTable.email],
@@ -38,47 +37,47 @@ class Repo {
         )
     }
 
-   suspend  fun addNote(note:Notes,email:String){
+    suspend fun addNote(note: Notes, email: String) {
         dbQuery {
-         NotesTable.insert {nt->
-             nt[noteId]=note.id
-             nt[noteDescription]=note.description
-             nt[noteTitle]=note.title
-             nt[userEmail]=email
-             nt[date]=note.date
-         }
-        }
-    }
-
-    suspend fun updateNote(note: Notes,email: String){
-        dbQuery {
-            NotesTable.update(
-                where = {NotesTable.userEmail.eq(email) and NotesTable.noteId.eq(note.id)}
-            ) {nt->
-                nt[noteId]=note.id
-                nt[noteDescription]=note.description
-                nt[noteTitle]=note.title
-                nt[userEmail]=email
-                nt[date]=note.date
+            NotesTable.insert { nt ->
+                nt[noteId] = note.id
+                nt[noteDescription] = note.description
+                nt[noteTitle] = note.title
+                nt[userEmail] = email
+                nt[date] = note.date
             }
         }
     }
 
-    suspend fun deleteNote(noteId:String){
+    suspend fun updateNote(note: Notes, email: String) {
         dbQuery {
-            NotesTable.deleteWhere { NotesTable.noteId.eq(noteId) }
+            NotesTable.update(
+                where = { NotesTable.userEmail.eq(email) and NotesTable.noteId.eq(note.id) }
+            ) { nt ->
+                nt[noteId] = note.id
+                nt[noteDescription] = note.description
+                nt[noteTitle] = note.title
+                nt[userEmail] = email
+                nt[date] = note.date
+            }
         }
     }
 
-    suspend fun getAllNotes(email: String):List<Notes> = dbQuery {
-        NotesTable.select{
+    suspend fun deleteNote(noteId: String, email: String) {
+        dbQuery {
+            NotesTable.deleteWhere { NotesTable.userEmail.eq(email) and NotesTable.noteId.eq(noteId) }
+        }
+    }
+
+    suspend fun getAllNotes(email: String): List<Notes> = dbQuery {
+        NotesTable.select {
             NotesTable.userEmail.eq(email)
         }.mapNotNull {
             rowToNote(it)
         }
     }
 
-    private fun rowToNote(row:ResultRow):Notes{
+    private fun rowToNote(row: ResultRow): Notes {
         return Notes(
             id = row[NotesTable.noteId],
             title = row[NotesTable.noteTitle],
