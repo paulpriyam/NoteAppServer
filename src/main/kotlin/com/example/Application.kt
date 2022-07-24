@@ -14,15 +14,11 @@ import io.ktor.gson.*
 import io.ktor.locations.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
 
-fun main(){
-    embeddedServer(Netty,8081){
-        module()
-    }.start(wait = true)
-}
+fun main(args: Array<String>): Unit =
+    io.ktor.server.netty.EngineMain.main(args)
 
+@Suppress("unused") // application.conf references the main function. This annotation prevents the IDE from marking it as unused.
 fun Application.module() {
 
     val db = Repo()
