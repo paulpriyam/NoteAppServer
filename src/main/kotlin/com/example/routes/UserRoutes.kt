@@ -9,6 +9,7 @@ import com.example.repository.Repo
 import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.locations.*
+import io.ktor.locations.post
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
@@ -29,7 +30,7 @@ fun Route.UserRoute(
     jwtService: JwtService,
     hashFunction:(String)->String
 ){
-    post(REGISTER_REQUEST) {
+    post<UserRegisterRoute> {
        val request=try {
            call.receive<RegisterRequest>()
        }catch (e:Exception){
@@ -46,7 +47,7 @@ fun Route.UserRoute(
         }
     }
 
-    post(LOGIN_REQUEST) {
+    post<UserLoginRoute>{
         val loginRequest=try {
             call.receive<LoginRequest>()
         }catch (e:Exception){
