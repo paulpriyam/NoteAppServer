@@ -55,7 +55,7 @@ fun Application.module() {
     routing {
         UserRoute(db, jwtService, hashFunction)
         noteRoutes(db)
-        get("/") {
+        get("/belabose") {
             call.respondText("Hello World!")
         }
     }
