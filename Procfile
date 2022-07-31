@@ -1,1 +1,1 @@
-web:build/install/com.example.noteappserver/bin/com.example.noteappserver
+web: build/install/com.example.noteappserver/bin/com.example.noteappserver
