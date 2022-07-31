@@ -31,12 +31,15 @@ object DatabaseFactory {
         config.isAutoCommit = false
         config.transactionIsolation = "TRANSACTION_REPEATABLE_READ"
 
-//        val uri = URI(System.getenv("DATABASE_URL"))
-//        val username = uri.userInfo.split(":").toTypedArray()[0]
-//        val password = uri.userInfo.split(":").toTypedArray()[1]
-        config.jdbcUrl = System.getenv("DATABASE_URL") // 2
-//        config.jdbcUrl =
-//            "jdbc:postgresql://" + uri.host + ":" + uri.port + uri.path + "?sslmode=require" + "&user=$username&password=$password"
+        /**
+         * setting up heroku postgresql and adding jdbc DATABASE_URL
+         */
+        val uri = URI(System.getenv("DATABASE_URL"))
+        val username = uri.userInfo.split(":").toTypedArray()[0]
+        val password = uri.userInfo.split(":").toTypedArray()[1]
+//        config.jdbcUrl = System.getenv("DATABASE_URL") // 2
+        config.jdbcUrl =
+            "jdbc:postgresql://" + uri.host + ":" + uri.port + uri.path + "?sslmode=require" + "&user=$username&password=$password"
         config.validate()
 
         return HikariDataSource(config)
