@@ -17,8 +17,12 @@ const val UPDATE_NOTE = "$NOTES/update"
 const val DELETE_NOTE = "$NOTES/delete"
 
 fun Route.noteRoutes(
-    db: Repo) {
+    db: Repo
+) {
 
+    /**
+     * adding this authenticates block to which will run the Authentication part of the Application and authenticate every user.
+     */
     authenticate("jwt") {
         post(CREATE_NOTE) {
             val note = try {
@@ -31,8 +35,8 @@ fun Route.noteRoutes(
 
             try {
                 val email = call.principal<User>()?.email!!
-                    db.addNote(note, email)
-                    call.respond(HttpStatusCode.OK, StandardResponse(true, "Note successfully added"))
+                db.addNote(note, email)
+                call.respond(HttpStatusCode.OK, StandardResponse(true, "Note successfully added"))
 
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.Conflict, StandardResponse(false, e.message ?: "Some Error Occurred"))
@@ -43,21 +47,20 @@ fun Route.noteRoutes(
             try {
                 val email = call.principal<User>()?.email
                 email?.let {
-                    db.getAllNotes(email)
-                    call.respond(HttpStatusCode.OK, StandardResponse(true, "Fetched all notes"))
+                    val notes = db.getAllNotes(email)
+                    call.respond(HttpStatusCode.OK, notes)
                 }
             } catch (e: Exception) {
-                call.respond(HttpStatusCode.Conflict, StandardResponse(false, e.message ?: "Some Error Occurred"))
+                call.respond(HttpStatusCode.Conflict, emptyList<Notes>())
             }
         }
 
-        put(UPDATE_NOTE) {
+        post(UPDATE_NOTE) {
             val note = try {
                 call.receive<Notes>()
-
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest, StandardResponse(false, "Missing parameter"))
-                return@put
+                return@post
             }
 
             try {

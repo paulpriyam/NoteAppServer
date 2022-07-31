@@ -14,16 +14,14 @@ import java.net.URI
 object DatabaseFactory {
 
 
-    fun init(){
+    fun init() {
         Database.connect(hikari())
-transaction {
-    SchemaUtils.create(UserTable)
-    SchemaUtils.create(NotesTable)
-}
+        transaction {
+            SchemaUtils.create(UserTable)
+            SchemaUtils.create(NotesTable)
+        }
 
     }
-
-
 
 
     fun hikari(): HikariDataSource {
@@ -33,16 +31,17 @@ transaction {
         config.isAutoCommit = false
         config.transactionIsolation = "TRANSACTION_REPEATABLE_READ"
 
-        val uri = URI(System.getenv("DATABASE_URL"))
-        val username = uri.userInfo.split(":").toTypedArray()[0]
-        val password = uri.userInfo.split(":").toTypedArray()[1]
-//        config.jdbcUrl = System.getenv("DATABASE_URL") // 2
-        config.jdbcUrl =
-            "jdbc:postgresql://" + uri.host + ":" + uri.port + uri.path + "?sslmode=require" + "&user=$username&password=$password"
+//        val uri = URI(System.getenv("DATABASE_URL"))
+//        val username = uri.userInfo.split(":").toTypedArray()[0]
+//        val password = uri.userInfo.split(":").toTypedArray()[1]
+        config.jdbcUrl = System.getenv("DATABASE_URL") // 2
+//        config.jdbcUrl =
+//            "jdbc:postgresql://" + uri.host + ":" + uri.port + uri.path + "?sslmode=require" + "&user=$username&password=$password"
         config.validate()
 
         return HikariDataSource(config)
     }
+
     suspend fun <T> dbQuery(block: () -> T): T =
         withContext(Dispatchers.IO) {
             transaction { block() }

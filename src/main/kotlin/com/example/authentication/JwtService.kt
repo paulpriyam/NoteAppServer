@@ -22,4 +22,13 @@ class JwtService {
             .withClaim("email",user.email)
             .sign(algorithm)
     }
+
+    /**
+     * Whenever user logs in or register, server would send the JWT token
+     * This JWT token contains 3 parts
+     * 1. Header
+     * 2.Payload
+     * 3.Signature
+     * example Header.Payload.Signature(xxxx.yyyy.zzzz)
+     */
 }

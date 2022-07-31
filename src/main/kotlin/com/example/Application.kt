@@ -18,7 +18,7 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 
 fun main(args: Array<String>): Unit =
-    io.ktor.server.netty.EngineMain.main(args)
+    EngineMain.main(args)
 
 @Suppress("unused") // application.conf references the main function. This annotation prevents the IDE from marking it as unused.
 fun Application.module() {
@@ -34,6 +34,9 @@ fun Application.module() {
     }
 
     install(Authentication) {
+        /**
+         * Inform which authentication we are using
+         */
         jwt("jwt") {
             verifier(jwtService.verifier)
             realm = "Note Server"
@@ -41,7 +44,7 @@ fun Application.module() {
                 val payload = it.payload
                 val email = payload.getClaim("email").asString()
                 val user = db.findUserByEmail(email)
-                user
+                user//we have to return a Principal, authenticating the User
             }
         }
     }

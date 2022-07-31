@@ -54,10 +54,8 @@ class Repo {
             NotesTable.update(
                 where = { NotesTable.userEmail.eq(email) and NotesTable.noteId.eq(note.id) }
             ) { nt ->
-                nt[noteId] = note.id
                 nt[noteDescription] = note.description
                 nt[noteTitle] = note.title
-                nt[userEmail] = email
                 nt[date] = note.date
             }
         }

@@ -14,7 +14,7 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 
-const val API_VERSION="/v1"
+const val API_VERSION = "/v1"
 const val USERS = "$API_VERSION/users"
 const val REGISTER_REQUEST = "$USERS/register"
 const val LOGIN_REQUEST = "$USERS/login"
@@ -26,48 +26,48 @@ class UserRegisterRoute
 class UserLoginRoute
 
 fun Route.UserRoute(
-    db:Repo,
+    db: Repo,
     jwtService: JwtService,
-    hashFunction:(String)->String
-){
+    hashFunction: (String) -> String
+) {
     post<UserRegisterRoute> {
-       val request=try {
-           call.receive<RegisterRequest>()
-       }catch (e:Exception){
-           call.respond(HttpStatusCode.BadRequest,StandardResponse(false,"Field is missing"))
-           return@post
-       }
-
-        try {
-            val user=User(request.email, hashFunction(request.password),request.name)
-            db.addUser(user)
-            call.respond(HttpStatusCode.OK,StandardResponse(true, jwtService.generateToken(user)))
-        }catch (e:Exception){
-            call.respond(HttpStatusCode.Conflict,StandardResponse(false,e.message?:"Some Error Occurred"))
-        }
-    }
-
-    post<UserLoginRoute>{
-        val loginRequest=try {
-            call.receive<LoginRequest>()
-        }catch (e:Exception){
-            call.respond(HttpStatusCode.BadRequest,StandardResponse(false,"Field is missing"))
+        val request = try {
+            call.receive<RegisterRequest>()
+        } catch (e: Exception) {
+            call.respond(HttpStatusCode.BadRequest, StandardResponse(false, "Field is missing"))
             return@post
         }
 
         try {
-           val user=db.findUserByEmail(loginRequest.email)
-           if(user==null){
-               call.respond(HttpStatusCode.BadRequest,StandardResponse(false,"entered wrong email"))
-           }else{
-               if(user.hashPassword==hashFunction(loginRequest.password)){
-                   call.respond(HttpStatusCode.OK,StandardResponse(true, jwtService.generateToken(user)))
-               }else{
-                   call.respond(HttpStatusCode.BadRequest,StandardResponse(false,"Entered wrong password"))
-               }
-           }
-        }catch (e:Exception){
-            call.respond(HttpStatusCode.Conflict,e.message?:"Some Error Occurred")
+            val user = User(request.email, hashFunction(request.password), request.name)
+            db.addUser(user)
+            call.respond(HttpStatusCode.OK, StandardResponse(true, jwtService.generateToken(user)))
+        } catch (e: Exception) {
+            call.respond(HttpStatusCode.Conflict, StandardResponse(false, e.message ?: "Some Error Occurred"))
+        }
+    }
+
+    post<UserLoginRoute> {
+        val loginRequest = try {
+            call.receive<LoginRequest>()
+        } catch (e: Exception) {
+            call.respond(HttpStatusCode.BadRequest, StandardResponse(false, "Field is missing"))
+            return@post
+        }
+
+        try {
+            val user = db.findUserByEmail(loginRequest.email)
+            if (user == null) {
+                call.respond(HttpStatusCode.BadRequest, StandardResponse(false, "entered wrong email"))
+            } else {
+                if (user.hashPassword == hashFunction(loginRequest.password)) {
+                    call.respond(HttpStatusCode.OK, StandardResponse(true, jwtService.generateToken(user)))
+                } else {
+                    call.respond(HttpStatusCode.BadRequest, StandardResponse(false, "Entered wrong password"))
+                }
+            }
+        } catch (e: Exception) {
+            call.respond(HttpStatusCode.Conflict, e.message ?: "Some Error Occurred")
         }
     }
 }
